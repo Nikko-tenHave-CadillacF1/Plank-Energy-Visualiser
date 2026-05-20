@@ -16,8 +16,6 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--data-dir", type=Path, default=Path("data"),
                    help="Folder of parquet DLS runs. If present, the CSV is (re)built.")
     p.add_argument("--csv", type=Path, default=Path("PlankData.csv"))
-    p.add_argument("--baseline", type=str, default=None,
-                   help="Substring identifying the baseline run; placed first in the CSV.")
     p.add_argument("--cutoff", type=float, default=60.0,
                    help="Upper plank-energy clamp for the colour scale [kJ].")
     p.add_argument("--model", choices=["plane", "quadratic"], default="plane",
@@ -36,8 +34,8 @@ def main() -> None:
 
     if args.data_dir.is_dir():
         build_csv(args.data_dir, args.csv,
-                  baseline=args.baseline,
-                  use_cache=not args.rebuild)
+                  use_cache=not args.rebuild,
+                  verbose=True)
     elif not args.csv.exists():
         raise SystemExit(
             f"No data directory ({args.data_dir}) and no CSV ({args.csv}). Nothing to plot."

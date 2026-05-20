@@ -31,7 +31,6 @@ pip install -r requirements.txt
 python visualiser.py                        # ingest data/, fit plane, plot
 python visualiser.py --model quadratic      # quadratic surface in (h, K)
 python visualiser.py --rebuild              # ignore the ingest cache
-python visualiser.py --baseline 5p22        # mark the 5p22 run as baseline (star marker)
 python visualiser.py --cutoff 80 --no-show  # headless run, custom colour cap
 ```
 

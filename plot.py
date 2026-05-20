@@ -60,12 +60,8 @@ def render_matplotlib(
                     vmin=vmin, vmax=vmax, linewidths=2)
     ax.clabel(cs, inline=True, fontsize=9, fmt="%.1f")
 
-    sc = ax.scatter(k[1:], h[1:], c=e[1:], cmap=CUSTOM_CMAP, edgecolors="black",
+    sc = ax.scatter(k, h, c=e, cmap=CUSTOM_CMAP, edgecolors="black",
                     s=80, zorder=5, vmin=vmin, vmax=vmax)
-    ax.scatter(k[0], h[0], c=[e[0]], cmap=CUSTOM_CMAP, edgecolors="black", s=220,
-               zorder=6, vmin=vmin, vmax=vmax, marker="*", linewidths=1.0,
-               label="Baseline run")
-    ax.legend(loc="upper right", framealpha=0.9)
 
     fig.colorbar(sc, ax=ax, label="EPlankF (Plank Energy) [kJ]")
     ax.set_xlabel("KHeaveCPF [N/mm]")
@@ -119,7 +115,7 @@ def render_plotly(
 
     e_fit = fit.predict(h, k)
     resid = e - e_fit
-    # Marker size scales with residual magnitude (12 baseline, up to ~22).
+    # Marker size scales with residual magnitude.
     abs_resid = np.abs(resid)
     size_scale = 10.0 / max(abs_resid.max(), 1e-9)
     sizes = 12.0 + abs_resid * size_scale
@@ -141,11 +137,10 @@ def render_plotly(
         name="Fitted surface",
     ))
 
-    # Scatter (skip baseline = row 0)
-    customdata = np.column_stack([e[1:], e_fit[1:], resid[1:], runs[1:]])
+    customdata = np.column_stack([e, e_fit, resid, runs])
     fig.add_trace(go.Scatter(
-        x=k[1:], y=h[1:], mode="markers",
-        marker=dict(size=sizes[1:], color=e[1:], colorscale=PLOTLY_COLORSCALE,
+        x=k, y=h, mode="markers",
+        marker=dict(size=sizes, color=e, colorscale=PLOTLY_COLORSCALE,
                     cmin=vmin, cmax=vmax, line=dict(width=1.2, color="black"),
                     showscale=False),
         customdata=customdata,
@@ -156,22 +151,6 @@ def render_plotly(
                        "<b>EPlankF (fitted)</b>: %{customdata[1]:.1f}<br>"
                        "<b>Residual</b>: %{customdata[2]:+.1f}<extra></extra>"),
         name="Measured data",
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=[k[0]], y=[h[0]], mode="markers",
-        marker=dict(size=max(sizes[0], 18), symbol="star",
-                    color=[e[0]], colorscale=PLOTLY_COLORSCALE,
-                    cmin=vmin, cmax=vmax, line=dict(width=1.5, color="black"),
-                    showscale=False),
-        customdata=np.array([[e[0], e_fit[0], resid[0], runs[0]]]),
-        hovertemplate=("<b>Baseline Run</b>: %{customdata[3]}<br>"
-                       "<b>KHeaveCPF</b>: %{x:.0f}<br>"
-                       "<b>hPlankF</b>: %{y:.2f}<br>"
-                       "<b>EPlankF (actual)</b>: %{customdata[0]:.1f}<br>"
-                       "<b>EPlankF (fitted)</b>: %{customdata[1]:.1f}<br>"
-                       "<b>Residual</b>: %{customdata[2]:+.1f}<extra></extra>"),
-        name="Baseline run",
     ))
 
     subtitle = (f"Fit ({fit.model}): {fit.equation_text()}<br>"

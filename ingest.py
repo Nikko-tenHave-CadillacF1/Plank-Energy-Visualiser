@@ -71,12 +71,11 @@ def compute_eplank(df: pd.DataFrame) -> float:
     return float(e_plank[-1])
 
 
-def _signature(paths: list[Path], baseline: str | None) -> str:
+def _signature(paths: list[Path]) -> str:
     """Hash filenames + mtimes + sizes so we can skip re-ingest when nothing changed."""
     h = hashlib.sha1()
     # Bump this tag whenever the ingest semantics change (formula, filters, ...).
-    h.update(b"ingest-v2-lap1\n")
-    h.update(f"baseline={baseline or ''}\n".encode("utf-8"))
+    h.update(b"ingest-v3-lap1\n")
     for p in sorted(paths):
         st = p.stat()
         h.update(p.name.encode("utf-8"))
@@ -84,30 +83,19 @@ def _signature(paths: list[Path], baseline: str | None) -> str:
     return h.hexdigest()
 
 
-def _sort_runs(paths: list[Path], baseline: str | None) -> list[Path]:
-    if baseline:
-        match = [p for p in paths if baseline.lower() in p.stem.lower()]
-        others = sorted(p for p in paths if p not in match)
-        return sorted(match) + others
-    return sorted(paths)
-
-
 def build_csv(
     data_dir: Path,
     csv_path: Path,
-    baseline: str | None = None,
     verbose: bool = True,
     use_cache: bool = True,
 ) -> pd.DataFrame:
     """Read every parquet in *data_dir*, compute per-run scalars, write to *csv_path*."""
-    parquets = list(data_dir.glob("*.parquet"))
+    parquets = sorted(data_dir.glob("*.parquet"))
     if not parquets:
         raise FileNotFoundError(f"No .parquet files found in {data_dir}")
 
-    parquets = _sort_runs(parquets, baseline)
-
     sig_path = csv_path.with_suffix(csv_path.suffix + ".sig")
-    sig = _signature(parquets, baseline)
+    sig = _signature(parquets)
     if use_cache and csv_path.exists() and sig_path.exists():
         if sig_path.read_text(encoding="utf-8").strip() == sig:
             if verbose:
@@ -147,8 +135,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     parser.add_argument("--csv", type=Path, default=Path("PlankData.csv"))
-    parser.add_argument("--baseline", type=str, default=None,
-                        help="Substring identifying the baseline run; placed first in the CSV.")
     parser.add_argument("--no-cache", action="store_true")
     args = parser.parse_args()
-    build_csv(args.data_dir, args.csv, baseline=args.baseline, use_cache=not args.no_cache)
+    build_csv(args.data_dir, args.csv, use_cache=not args.no_cache)
