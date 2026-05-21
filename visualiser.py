@@ -48,8 +48,8 @@ SPEED_AT  = None                       # e.g. 200.0
 # ── Filename parsing ──────────────────────────────────────────────────────────
 # Regex with named capture groups. Group names must match the axis *_PARAM names
 # for any axis whose source is "filename".
-# Default pattern matches: "5p22 EOS hPlank 611 KHeaveCPF_DLS.parquet"
-FILENAME_PATTERN = r"^(?P<FRH>\d+p\d+)\s+KHeaveCPF\s+(?P<KHeaveCPF>\d+)\s+\d+kph_DLS\.parquet$"
+# Default pattern matches: "FRH 21p2 KHeaveCPF 535 200kph_DLS.parquet"
+FILENAME_PATTERN = r"^FRH\s+(?P<FRH>\d+p\d+)\s+KHeaveCPF\s+(?P<KHeaveCPF>\d+)\s+\d+kph_DLS\.parquet$"
 P_DECIMAL_GROUPS = ["FRH"]
 
 # ── Fitting ───────────────────────────────────────────────────────────────────
