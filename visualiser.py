@@ -25,7 +25,7 @@ REBUILD  = False                       # Set True to force re-ingest (ignore cac
 
 # ── Axis names (used as CSV headers and plot labels) ──────────────────────────
 X_PARAM = "KHeaveCPF"                  # x-axis label
-Y_PARAM = "hPlankF"                    # y-axis label
+Y_PARAM = "FRH"                        # y-axis label
 Z_PARAM = "EPlankF"                    # colour-axis label
 
 # ── Axis sources ──────────────────────────────────────────────────────────────
@@ -49,9 +49,8 @@ SPEED_AT  = None                       # e.g. 200.0
 # Regex with named capture groups. Group names must match the axis *_PARAM names
 # for any axis whose source is "filename".
 # Default pattern matches: "5p22 EOS hPlank 611 KHeaveCPF_DLS.parquet"
-FILENAME_PATTERN = None                # None = use built-in default pattern
-# Groups where 'p' is used as the decimal separator (e.g. "5p22" → 5.22)
-P_DECIMAL_GROUPS = ["hPlankF"]
+FILENAME_PATTERN = r"^(?P<FRH>\d+p\d+)\s+KHeaveCPF\s+(?P<KHeaveCPF>\d+)\s+\d+kph_DLS\.parquet$"
+P_DECIMAL_GROUPS = ["FRH"]
 
 # ── Fitting ───────────────────────────────────────────────────────────────────
 MODEL  = "plane"                       # "plane" or "quadratic"
